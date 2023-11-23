@@ -48,7 +48,6 @@ class GmmFull(torch.nn.Module):
         # detect singularity collapse and reset
         if nll_loss.isnan():
             with torch.no_grad():
-                #pass
                 self.mixture.logits.uniform_(0, 1)
                 self.mus.data.uniform_(-self.width, self.width)
                 init_cov_factor = torch.rand(self.num_mixtures, self.num_dims, self.num_dims)
