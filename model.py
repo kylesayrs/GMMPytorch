@@ -18,6 +18,7 @@ class GmmFull(torch.nn.Module):
         self.components = MultivariateNormal(self.mus, self.get_covariance_matrix())
         self.mixture_model = MixtureSameFamily(self.mixture, self.components)
 
+        # workaround, see https://github.com/pytorch/pytorch/issues/114417
         self.mixture.logits.requires_grad = False
     
 
@@ -51,6 +52,7 @@ class GmmDiagonal(torch.nn.Module):
         self.components = Independent(Normal(self.mus, self.sigmas_diag), 1)
         self.mixture_model = MixtureSameFamily(self.mixture, self.components)
 
+        # workaround, see https://github.com/pytorch/pytorch/issues/114417
         self.mixture.logits.requires_grad = False
 
 
