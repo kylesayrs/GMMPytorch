@@ -20,7 +20,7 @@ parser.add_argument("--log_freq", type=int, default=3_000)
 parser.add_argument("--width", type=float, default=5.0)
 parser.add_argument("--mixture_lr", type=float, default=3e-5)
 parser.add_argument("--component_lr", type=float, default=1e-2)
-parser.add_argument("--seed", type=int, default=402)
+parser.add_argument("--seed", type=int, default=0)
 
 
 if __name__ == "__main__":

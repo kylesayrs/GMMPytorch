@@ -1,6 +1,7 @@
 from typing import Iterator
 
 import torch
+import warnings
 from torch.distributions import (
     Normal,
     Categorical,
@@ -35,10 +36,28 @@ class GmmFull(torch.nn.Module):
     def forward(self, x: torch.Tensor):
         # detect singularity collapse and reset
         if torch.any(self.scale_tril.isnan()):
-            print("SINGULARITY")
             self.__init__(self.num_mixtures, self.num_dims, self.width)
+            warnings.warn("Encountered singularity, model has been reset")
 
         return -1 * self.mixture_model.log_prob(x).mean()
+    
+    def forward(self, x: torch.Tensor):
+
+        nll_loss = -1 * self.mixture_model.log_prob(x).mean()
+
+        # detect singularity collapse and reset
+        if nll_loss.isnan():
+            with torch.no_grad():
+                #pass
+                self.mixture.logits.uniform_(0, 1)
+                self.mus.data.uniform_(-self.width, self.width)
+                init_cov_factor = torch.rand(self.num_mixtures, self.num_dims, self.num_dims)
+                init_scale_tril = torch.linalg.cholesky(init_cov_factor @ init_cov_factor.mT)
+                self.scale_tril.data = init_scale_tril
+
+            nll_loss = -1 * self.mixture_model.log_prob(x).mean()
+
+        return nll_loss
     
 
     def component_parameters(self) -> Iterator[torch.nn.Parameter]:
@@ -76,11 +95,19 @@ class GmmDiagonal(torch.nn.Module):
 
 
     def forward(self, x: torch.Tensor):
-        # detect singularity collapse and reset
-        if torch.any(self.sigmas_diag.isnan()):
-            self.__init__(self.num_mixtures, self.num_dims, self.width)
 
-        return -1 * self.mixture_model.log_prob(x).mean()
+        nll_loss = -1 * self.mixture_model.log_prob(x).mean()
+
+        # detect singularity collapse and reset
+        if nll_loss.isnan():
+            with torch.no_grad():
+                self.mixture.logits.uniform_(0, 1)
+                self.mus.data.uniform_(-self.width, self.width)
+                self.sigmas_diag.data.uniform_(0, 1)
+
+            nll_loss = -1 * self.mixture_model.log_prob(x).mean()
+
+        return nll_loss
     
 
     def component_parameters(self) -> Iterator[torch.nn.Parameter]:
