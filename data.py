@@ -6,7 +6,7 @@ import numpy
 from FamilyTypes import MixtureFamily
 
 
-def sample_data(
+def generate_data(
     num_samples: int,
     num_clusters: int,
     D: int,

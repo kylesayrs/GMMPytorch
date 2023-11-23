@@ -2,10 +2,9 @@ from typing import Iterator
 from torch.distributions import Categorical, MultivariateNormal, Independent, Normal, MixtureSameFamily
 
 import torch
-import itertools
 from torch.nn.parameter import Parameter
 
-from FamilyTypes import MixtureFamily, get_mixture_family_from_str
+from FamilyTypes import MixtureFamily
 
 
 class GmmFull(torch.nn.Module):
@@ -19,7 +18,7 @@ class GmmFull(torch.nn.Module):
         self.mixture_model = MixtureSameFamily(self.mixture, self.components)
 
         # workaround, see https://github.com/pytorch/pytorch/issues/114417
-        self.mixture.logits.requires_grad = False
+        self.mixture.logits.requires_grad = True
     
 
     def forward(self, x: torch.Tensor):
@@ -53,7 +52,7 @@ class GmmDiagonal(torch.nn.Module):
         self.mixture_model = MixtureSameFamily(self.mixture, self.components)
 
         # workaround, see https://github.com/pytorch/pytorch/issues/114417
-        self.mixture.logits.requires_grad = False
+        self.mixture.logits.requires_grad = True
 
 
     def forward(self, x: torch.Tensor):

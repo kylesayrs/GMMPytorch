@@ -3,7 +3,7 @@ import numpy
 import argparse
 import warnings
 
-from data import sample_data
+from data import generate_data
 from model import get_model
 from visualize import log_and_visualize
 from FamilyTypes import FAMILY_NAMES, get_mixture_family_from_str
@@ -14,10 +14,15 @@ parser.add_argument("--samples", default=500)
 parser.add_argument("--clusters", default=2)
 parser.add_argument("--mixtures", default=5)
 parser.add_argument("--dims", default=2)
-parser.add_argument("--iterations", default=5_000)
+parser.add_argument("--iterations", default=15_000)
 parser.add_argument("--family", type=str, default="diagonal", choices=FAMILY_NAMES)
-parser.add_argument("--log_freq", type=int, default=1_000)
-parser.add_argument("--seed", type=int, default=43)
+parser.add_argument("--log_freq", type=int, default=3_000)
+parser.add_argument("--width", type=float, default=10.0)
+parser.add_argument("--mixture_lr", type=float, default=3e-4)
+parser.add_argument("--mixture_sched", type=int, default=10_000)
+parser.add_argument("--component_lr", type=float, default=1e-2)
+parser.add_argument("--component_sched", type=int, default=10_000)
+parser.add_argument("--seed", type=int, default=0)
 
 
 if __name__ == "__main__":
@@ -25,6 +30,7 @@ if __name__ == "__main__":
     numpy.random.seed(args.seed)
     torch.manual_seed(args.seed)
 
+    # warnings
     if args.dims != 2:
         warnings.warn("Visualization is only supported for dims=2")
     
@@ -32,21 +38,21 @@ if __name__ == "__main__":
     mixture_family = get_mixture_family_from_str(args.family)
 
     # load data
-    data, true_mus, true_sigmas = sample_data(
+    data, true_mus, true_sigmas = generate_data(
         args.samples, args.clusters, args.dims, mixture_family
     )
 
     # set up model
     model = get_model(mixture_family, args.mixtures, args.dims)
 
-    # separate optimizers for mixture coeficients and components
-    components_optimizer = torch.optim.Adam(model.component_parameters(), lr=1e-2)
-    mixture_optimizer = torch.optim.Adam(model.mixture_parameters(), lr=1e-2)
-    components_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(components_optimizer, 10_000)
-    mixture_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(mixture_optimizer, 10_000)
+    # create separate optimizers for mixture coeficients and components
+    mixture_optimizer = torch.optim.Adam(model.mixture_parameters(), lr=args.mixture_lr)
+    mixture_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(mixture_optimizer, args.mixture_sched)
+    components_optimizer = torch.optim.Adam(model.component_parameters(), lr=args.component_lr)
+    components_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(components_optimizer, args.component_sched)
 
     for batch_index in range(args.iterations):
-        # zero grad
+        # reset gradient
         components_optimizer.zero_grad()
         mixture_optimizer.zero_grad()
 
@@ -59,9 +65,9 @@ if __name__ == "__main__":
 
         # backwards
         loss.backward()
-        components_optimizer.step()
         mixture_optimizer.step()
-        components_scheduler.step()
         mixture_scheduler.step()
+        components_optimizer.step()
+        components_scheduler.step()
     
     log_and_visualize(data, model, loss)

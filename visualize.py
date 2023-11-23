@@ -18,9 +18,11 @@ def plot_2d(data: torch.Tensor, model: torch.nn.Module, loss: torch.Tensor):
     covariance_matrices = model.get_covariance_matrix().detach()
     means = model.mus.detach()
 
+    print(probs)
+
     for cluster_index in range(covariance_matrices.shape[0]):
-        x = numpy.linspace(-20, 20, num=100)
-        y = numpy.linspace(-20, 20, num=100)
+        x = numpy.linspace(-10, 10, num=100)
+        y = numpy.linspace(-10, 10, num=100)
         X, Y = numpy.meshgrid(x,y)
 
         distr = multivariate_normal(
