@@ -20,6 +20,7 @@ class GmmFull(torch.nn.Module):
         self.num_dims = num_dims
         self.width = width
 
+        # Use cholesky form in order to ensure PSD coefficient matrix
         self.mus = torch.nn.Parameter(torch.rand(num_mixtures, num_dims).uniform_(-width, width))
         init_cov_factor = torch.rand(num_mixtures, num_dims, num_dims)
         init_scale_tril = torch.linalg.cholesky(init_cov_factor @ init_cov_factor.transpose(-2, -1))
@@ -31,15 +32,6 @@ class GmmFull(torch.nn.Module):
 
         # workaround, see https://github.com/pytorch/pytorch/issues/114417
         self.mixture.logits.requires_grad = True
-
-
-    def forward(self, x: torch.Tensor):
-        # detect singularity collapse and reset
-        if torch.any(self.scale_tril.isnan()):
-            self.__init__(self.num_mixtures, self.num_dims, self.width)
-            warnings.warn("Encountered singularity, model has been reset")
-
-        return -1 * self.mixture_model.log_prob(x).mean()
     
 
     def forward(self, x: torch.Tensor):
