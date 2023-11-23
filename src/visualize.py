@@ -8,12 +8,19 @@ from torch.distributions.utils import logits_to_probs
 COLORS = ["red", "blue", "green", "orange", "purple"]
 
 
-def log_and_visualize(iteration_index: int, data: torch.Tensor, model: torch.nn.Module, loss: torch.Tensor):
+def log_and_visualize(
+    iteration_index: int,
+    data: torch.Tensor,
+    model: torch.nn.Module,
+    loss: torch.Tensor,
+    width: float
+):
     print(f"Iteration: {iteration_index:2d}, Loss: {loss.item():.2f}")
-    plot_2d(data, model, loss)
+    if data.shape[1] == 2:
+        plot_2d(data, model, width)
 
 
-def plot_2d(data: torch.Tensor, model: torch.nn.Module, loss: torch.Tensor):    
+def plot_2d(data: torch.Tensor, model: torch.nn.Module, width: float):    
     probs = logits_to_probs(model.mixture.logits).detach()
     covariance_matrices = model.get_covariance_matrix().detach()
     means = model.mus.detach()
@@ -21,9 +28,9 @@ def plot_2d(data: torch.Tensor, model: torch.nn.Module, loss: torch.Tensor):
     probs = torch.sqrt(probs)  # clearer visualization
 
     for cluster_index in range(covariance_matrices.shape[0]):
-        x = numpy.linspace(-10, 10, num=100)
-        y = numpy.linspace(-10, 10, num=100)
-        X, Y = numpy.meshgrid(x,y)
+        x = numpy.linspace(-width - 1, width + 1, num=100)
+        y = numpy.linspace(-width - 1, width + 1, num=100)
+        X, Y = numpy.meshgrid(x, y)
 
         distr = multivariate_normal(
             cov=covariance_matrices[cluster_index],

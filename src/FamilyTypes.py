@@ -18,6 +18,6 @@ def get_mixture_family_from_str(family_name: str):
             return family
 
     raise ValueError(
-        f"Unknown mixture family {family_name}. "
+        f"Unknown mixture family `{family_name}`. "
         f"Please select from {FAMILY_NAMES}"
     )

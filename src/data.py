@@ -3,7 +3,7 @@ from typing import Tuple, List
 import torch
 import numpy
 
-from FamilyTypes import MixtureFamily
+from src.FamilyTypes import MixtureFamily
 
 
 def generate_data(
@@ -29,7 +29,7 @@ def generate_data(
     samples_per_cluster = num_samples // num_clusters
 
     for _ in range(num_clusters):
-        true_mu = numpy.random.rand(num_dims) * width
+        true_mu = numpy.random.uniform(-width, width, num_dims)
 
         if family == MixtureFamily.FULL:
             true_sigma_sqrt = numpy.random.rand(num_dims, num_dims)

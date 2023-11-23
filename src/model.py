@@ -2,36 +2,47 @@ from typing import Iterator
 
 import torch
 from torch.distributions import (
-    Categorical,
-    MultivariateNormal,
-    Independent,
     Normal,
+    Categorical,
+    Independent,
+    MultivariateNormal,
     MixtureSameFamily
 )
 
-from FamilyTypes import MixtureFamily
+from src.FamilyTypes import MixtureFamily
 
 
 class GmmFull(torch.nn.Module):
     def __init__(self, num_mixtures: int, num_dims: int, width: int):
         super().__init__()
-        self.mus = torch.nn.Parameter(torch.rand(num_mixtures, num_dims) * width)
-        self.sigmas_factor = torch.nn.Parameter(torch.rand(num_mixtures, num_dims, num_dims))
+        self.num_mixtures = num_mixtures
+        self.num_dims = num_dims
+        self.width = width
+
+        self.mus = torch.nn.Parameter(torch.rand(num_mixtures, num_dims).uniform_(-width, width))
+        init_cov_factor = torch.rand(num_mixtures, num_dims, num_dims)
+        init_scale_tril = torch.linalg.cholesky(init_cov_factor @ init_cov_factor.transpose(-2, -1))
+        self.scale_tril = torch.nn.Parameter(init_scale_tril)
 
         self.mixture = Categorical(logits=torch.rand(num_mixtures, ))
-        self.components = MultivariateNormal(self.mus, self.get_covariance_matrix())
+        self.components = MultivariateNormal(self.mus, scale_tril=self.scale_tril)
         self.mixture_model = MixtureSameFamily(self.mixture, self.components)
 
-        # workaround, see https://github.com/pytorch/pytorch/issues/114417
+        # workaround
         self.mixture.logits.requires_grad = True
-    
+
 
     def forward(self, x: torch.Tensor):
+        # detect singularity collapse and reset
+        if torch.any(self.scale_tril.isnan()):
+            print("SINGULARITY")
+            self.__init__(self.num_mixtures, self.num_dims, self.width)
+
         return -1 * self.mixture_model.log_prob(x).mean()
     
 
     def component_parameters(self) -> Iterator[torch.nn.Parameter]:
-        return iter([self.mus, self.sigmas_factor])
+        return iter([self.mus, self.scale_tril])
     
 
     def mixture_parameters(self) -> Iterator[torch.nn.Parameter]:
@@ -43,13 +54,17 @@ class GmmFull(torch.nn.Module):
     
     
     def get_covariance_matrix(self) -> torch.Tensor:
-        return self.sigmas_factor @ self.sigmas_factor.transpose(-2, -1)
+        return self.scale_tril @ self.scale_tril.transpose(-2, -1)
     
 
 class GmmDiagonal(torch.nn.Module):
     def __init__(self, num_mixtures: int, num_dims: int, width: int):
         super().__init__()
-        self.mus = torch.nn.Parameter(torch.rand(num_mixtures, num_dims) * width)
+        self.num_mixtures = num_mixtures
+        self.num_dims = num_dims
+        self.width = width
+
+        self.mus = torch.nn.Parameter(torch.rand(num_mixtures, num_dims).uniform_(-width, width))
         self.sigmas_diag = torch.nn.Parameter(torch.rand(num_mixtures, num_dims))
 
         self.mixture = Categorical(logits=torch.rand(num_mixtures, ))
@@ -61,6 +76,10 @@ class GmmDiagonal(torch.nn.Module):
 
 
     def forward(self, x: torch.Tensor):
+        # detect singularity collapse and reset
+        if torch.any(self.sigmas_diag.isnan()):
+            self.__init__(self.num_mixtures, self.num_dims, self.width)
+
         return -1 * self.mixture_model.log_prob(x).mean()
     
 
