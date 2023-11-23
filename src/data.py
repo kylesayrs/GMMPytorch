@@ -20,6 +20,7 @@ def generate_data(
     :param num_clusters: number of mock gaussian distributions to sample from
     :param num_dims: number of dimensions
     :param width: width of possible means
+    :param family: distribution family used for both modeling and data generating
     :return: true means, true covariance matrices, and samples
     """
     true_mus = []

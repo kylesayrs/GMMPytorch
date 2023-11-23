@@ -29,7 +29,7 @@ class GmmFull(torch.nn.Module):
         self.components = MultivariateNormal(self.mus, scale_tril=self.scale_tril)
         self.mixture_model = MixtureSameFamily(self.mixture, self.components)
 
-        # workaround
+        # workaround, see https://github.com/pytorch/pytorch/issues/114417
         self.mixture.logits.requires_grad = True
 
 
@@ -41,8 +41,8 @@ class GmmFull(torch.nn.Module):
 
         return -1 * self.mixture_model.log_prob(x).mean()
     
-    def forward(self, x: torch.Tensor):
 
+    def forward(self, x: torch.Tensor):
         nll_loss = -1 * self.mixture_model.log_prob(x).mean()
 
         # detect singularity collapse and reset
@@ -95,7 +95,6 @@ class GmmDiagonal(torch.nn.Module):
 
 
     def forward(self, x: torch.Tensor):
-
         nll_loss = -1 * self.mixture_model.log_prob(x).mean()
 
         # detect singularity collapse and reset
