@@ -39,11 +39,11 @@ if __name__ == "__main__":
 
     # load data
     data, true_mus, true_sigmas = generate_data(
-        args.samples, args.clusters, args.dims, mixture_family
+        args.samples, args.clusters, args.dims, args.width, mixture_family
     )
 
     # set up model
-    model = get_model(mixture_family, args.mixtures, args.dims)
+    model = get_model(mixture_family, args.mixtures, args.dims, args.width)
 
     # create separate optimizers for mixture coeficients and components
     mixture_optimizer = torch.optim.Adam(model.mixture_parameters(), lr=args.mixture_lr)
@@ -51,7 +51,8 @@ if __name__ == "__main__":
     components_optimizer = torch.optim.Adam(model.component_parameters(), lr=args.component_lr)
     components_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(components_optimizer, args.component_sched)
 
-    for batch_index in range(args.iterations):
+    # optimize
+    for iteration_index in range(args.iterations):
         # reset gradient
         components_optimizer.zero_grad()
         mixture_optimizer.zero_grad()
@@ -60,8 +61,8 @@ if __name__ == "__main__":
         loss = model(data)
 
         # log and visualize
-        if batch_index % args.log_freq == 0:
-            log_and_visualize(data, model, loss)
+        if iteration_index % args.log_freq == 0:
+            log_and_visualize(iteration_index, data, model, loss)
 
         # backwards
         loss.backward()
@@ -70,4 +71,4 @@ if __name__ == "__main__":
         components_optimizer.step()
         components_scheduler.step()
     
-    log_and_visualize(data, model, loss)
+    log_and_visualize(iteration_index, data, model, loss)

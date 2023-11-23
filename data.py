@@ -9,7 +9,8 @@ from FamilyTypes import MixtureFamily
 def generate_data(
     num_samples: int,
     num_clusters: int,
-    D: int,
+    num_dims: int,
+    width: float,
     family: MixtureFamily
 ) -> Tuple[List[numpy.ndarray], List[numpy.ndarray], torch.Tensor]:
     """
@@ -17,7 +18,8 @@ def generate_data(
 
     :param num_samples: number of total samples
     :param num_clusters: number of mock gaussian distributions to sample from
-    :param D: number of dimensions
+    :param num_dims: number of dimensions
+    :param width: width of possible means
     :return: true means, true covariance matrices, and samples
     """
     true_mus = []
@@ -27,13 +29,13 @@ def generate_data(
     samples_per_cluster = num_samples // num_clusters
 
     for _ in range(num_clusters):
-        true_mu = numpy.random.rand(D) * 10
+        true_mu = numpy.random.rand(num_dims) * width
 
         if family == MixtureFamily.FULL:
-            true_sigma_sqrt = numpy.random.rand(D, D)
+            true_sigma_sqrt = numpy.random.rand(num_dims, num_dims)
             true_sigma = true_sigma_sqrt.T @ true_sigma_sqrt
         else:
-            true_sigma = numpy.diag(numpy.random.rand(D))
+            true_sigma = numpy.diag(numpy.random.rand(num_dims))
 
         samples = numpy.random.multivariate_normal(true_mu, true_sigma, samples_per_cluster)
 

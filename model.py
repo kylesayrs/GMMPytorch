@@ -1,16 +1,21 @@
 from typing import Iterator
-from torch.distributions import Categorical, MultivariateNormal, Independent, Normal, MixtureSameFamily
 
 import torch
-from torch.nn.parameter import Parameter
+from torch.distributions import (
+    Categorical,
+    MultivariateNormal,
+    Independent,
+    Normal,
+    MixtureSameFamily
+)
 
 from FamilyTypes import MixtureFamily
 
 
 class GmmFull(torch.nn.Module):
-    def __init__(self, num_mixtures: int, num_dims: int):
+    def __init__(self, num_mixtures: int, num_dims: int, width: int):
         super().__init__()
-        self.mus = torch.nn.Parameter(torch.rand(num_mixtures, num_dims))
+        self.mus = torch.nn.Parameter(torch.rand(num_mixtures, num_dims) * width)
         self.sigmas_factor = torch.nn.Parameter(torch.rand(num_mixtures, num_dims, num_dims))
 
         self.mixture = Categorical(logits=torch.rand(num_mixtures, ))
@@ -25,11 +30,11 @@ class GmmFull(torch.nn.Module):
         return -1 * self.mixture_model.log_prob(x).mean()
     
 
-    def component_parameters(self) -> Iterator[Parameter]:
+    def component_parameters(self) -> Iterator[torch.nn.Parameter]:
         return iter([self.mus, self.sigmas_factor])
     
 
-    def mixture_parameters(self) -> Iterator[Parameter]:
+    def mixture_parameters(self) -> Iterator[torch.nn.Parameter]:
         return iter([self.mixture.logits])
     
 
@@ -42,9 +47,9 @@ class GmmFull(torch.nn.Module):
     
 
 class GmmDiagonal(torch.nn.Module):
-    def __init__(self, num_mixtures: int, num_dims: int):
+    def __init__(self, num_mixtures: int, num_dims: int, width: int):
         super().__init__()
-        self.mus = torch.nn.Parameter(torch.rand(num_mixtures, num_dims))
+        self.mus = torch.nn.Parameter(torch.rand(num_mixtures, num_dims) * width)
         self.sigmas_diag = torch.nn.Parameter(torch.rand(num_mixtures, num_dims))
 
         self.mixture = Categorical(logits=torch.rand(num_mixtures, ))
@@ -59,11 +64,11 @@ class GmmDiagonal(torch.nn.Module):
         return -1 * self.mixture_model.log_prob(x).mean()
     
 
-    def component_parameters(self) -> Iterator[Parameter]:
+    def component_parameters(self) -> Iterator[torch.nn.Parameter]:
         return iter([self.mus, self.sigmas_diag])
     
 
-    def mixture_parameters(self) -> Iterator[Parameter]:
+    def mixture_parameters(self) -> Iterator[torch.nn.Parameter]:
         return iter([self.mixture.logits])
     
 
@@ -75,12 +80,17 @@ class GmmDiagonal(torch.nn.Module):
         return torch.diag_embed(self.sigmas_diag)
 
 
-def get_model(mixture_family: MixtureFamily, num_mixtures: int, num_dims: int):
+def get_model(
+    mixture_family: MixtureFamily,
+    num_mixtures: int,
+    num_dims: int,
+    width: float
+) -> torch.nn.Module:
     if mixture_family == MixtureFamily.FULL:
-        return GmmFull(num_mixtures, num_dims)
+        return GmmFull(num_mixtures, num_dims, width)
     
     if mixture_family == MixtureFamily.DIAGONAL:
-        return GmmDiagonal(num_mixtures, num_dims)
+        return GmmDiagonal(num_mixtures, num_dims, width)
     
     raise NotImplementedError(
         f"Mixture family {mixture_family.value} not implemented yet"

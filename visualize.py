@@ -8,8 +8,8 @@ from torch.distributions.utils import logits_to_probs
 COLORS = ["red", "blue", "green", "orange", "purple"]
 
 
-def log_and_visualize(data: torch.Tensor, model: torch.nn.Module, loss: torch.Tensor):
-    print(f"Loss: {loss.item():.2f}")
+def log_and_visualize(iteration_index: int, data: torch.Tensor, model: torch.nn.Module, loss: torch.Tensor):
+    print(f"Iteration: {iteration_index:2d}, Loss: {loss.item():.2f}")
     plot_2d(data, model, loss)
 
 
@@ -17,8 +17,6 @@ def plot_2d(data: torch.Tensor, model: torch.nn.Module, loss: torch.Tensor):
     probs = logits_to_probs(model.mixture.logits).detach()
     covariance_matrices = model.get_covariance_matrix().detach()
     means = model.mus.detach()
-
-    print(probs)
 
     for cluster_index in range(covariance_matrices.shape[0]):
         x = numpy.linspace(-10, 10, num=100)
