@@ -16,10 +16,8 @@ Run demo
 python3 demo.py
 ```
 
-<!---
 ## Derivation ##
-TODO
--->
+For a from-scratch implementation of negative log likelihood backpropogation, see [GMMScratch](https://github.com/kylesayrs/GMMScratch/tree/master)
 
 
 ## Mixture Types ##
