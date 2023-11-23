@@ -11,7 +11,7 @@ from FamilyTypes import FAMILY_NAMES, get_mixture_family_from_str
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--samples", default=500)
-parser.add_argument("--clusters", default=2)
+parser.add_argument("--clusters", default=5)
 parser.add_argument("--mixtures", default=5)
 parser.add_argument("--dims", default=2)
 parser.add_argument("--iterations", default=15_000)
