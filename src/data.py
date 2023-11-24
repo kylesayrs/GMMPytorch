@@ -2,6 +2,7 @@ from typing import Tuple, List
 
 import torch
 import numpy
+from sklearn.datasets import make_spd_matrix
 
 from src.FamilyTypes import MixtureFamily
 
@@ -10,8 +11,9 @@ def generate_data(
     num_samples: int,
     num_clusters: int,
     num_dims: int,
-    width: float,
-    family: MixtureFamily
+    radius: float,
+    family: MixtureFamily,
+    seed: int = 42
 ) -> Tuple[List[numpy.ndarray], List[numpy.ndarray], torch.Tensor]:
     """
     Sample data from mock gaussian distributions
@@ -19,10 +21,12 @@ def generate_data(
     :param num_samples: number of total samples
     :param num_clusters: number of mock gaussian distributions to sample from
     :param num_dims: number of dimensions
-    :param width: width of possible means
+    :param radius: l1 radius of possible means
     :param family: distribution family used for both modeling and data generating
     :return: true means, true covariance matrices, and samples
     """
+    numpy_random = numpy.random.default_rng(seed)
+
     true_mus = []
     true_sigmas = []
     all_samples = []
@@ -30,15 +34,14 @@ def generate_data(
     samples_per_cluster = num_samples // num_clusters
 
     for _ in range(num_clusters):
-        true_mu = numpy.random.uniform(-width, width, num_dims)
+        true_mu = numpy_random.uniform(-radius, radius, num_dims)
 
         if family == MixtureFamily.FULL:
-            true_sigma_sqrt = numpy.random.rand(num_dims, num_dims)
-            true_sigma = true_sigma_sqrt.T @ true_sigma_sqrt
+            true_sigma = make_spd_matrix(num_dims, random_state=seed)
         else:
-            true_sigma = numpy.diag(numpy.random.rand(num_dims))
+            true_sigma = numpy.diag(numpy_random.random(num_dims))
 
-        samples = numpy.random.multivariate_normal(true_mu, true_sigma, samples_per_cluster)
+        samples = numpy_random.multivariate_normal(true_mu, true_sigma, samples_per_cluster)
 
         true_mus.append(true_mu)
         true_sigmas.append(true_sigma)

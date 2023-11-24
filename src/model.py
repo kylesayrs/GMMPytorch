@@ -9,24 +9,33 @@ from torch.distributions import (
     MultivariateNormal,
     MixtureSameFamily
 )
+from sklearn.datasets import make_spd_matrix
 
 from src.FamilyTypes import MixtureFamily
+from src.utils import make_random_scale_trils
 
 
 class GmmFull(torch.nn.Module):
-    def __init__(self, num_mixtures: int, num_dims: int, width: int):
+    def __init__(
+        self,
+        num_components: int,
+        num_dims: int,
+        radius: float = 1.0,
+        seed: int = 42
+    ):
+        torch.manual_seed(0)
+
         super().__init__()
-        self.num_mixtures = num_mixtures
+        self.num_components = num_components
         self.num_dims = num_dims
-        self.width = width
+        self.radius = radius
+        self.seed = seed
+        self._num_resets = 0
 
-        # Use cholesky form in order to ensure PSD coefficient matrix
-        self.mus = torch.nn.Parameter(torch.rand(num_mixtures, num_dims).uniform_(-width, width))
-        init_cov_factor = torch.rand(num_mixtures, num_dims, num_dims)
-        init_scale_tril = torch.linalg.cholesky(init_cov_factor @ init_cov_factor.transpose(-2, -1))
-        self.scale_tril = torch.nn.Parameter(init_scale_tril)
+        self.mus = torch.nn.Parameter(torch.rand(num_components, num_dims).uniform_(-radius, radius))
+        self.scale_tril = torch.nn.Parameter(make_random_scale_trils(num_components, num_dims))
 
-        self.mixture = Categorical(logits=torch.rand(num_mixtures, ))
+        self.mixture = Categorical(logits=torch.zeros(num_components, ))
         self.components = MultivariateNormal(self.mus, scale_tril=self.scale_tril)
         self.mixture_model = MixtureSameFamily(self.mixture, self.components)
 
@@ -34,17 +43,16 @@ class GmmFull(torch.nn.Module):
         self.mixture.logits.requires_grad = True
     
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         nll_loss = -1 * self.mixture_model.log_prob(x).mean()
 
         # detect singularity collapse and reset
         if nll_loss.isnan():
+            _num_resets += 1
             with torch.no_grad():
                 self.mixture.logits.uniform_(0, 1)
-                self.mus.data.uniform_(-self.width, self.width)
-                init_cov_factor = torch.rand(self.num_mixtures, self.num_dims, self.num_dims)
-                init_scale_tril = torch.linalg.cholesky(init_cov_factor @ init_cov_factor.mT)
-                self.scale_tril.data = init_scale_tril
+                self.mus.data.uniform_(-self.radius, self.radius)
+                self.scale_tril.data = make_random_scale_trils(self.num_components, self.num_dims)
 
             nll_loss = -1 * self.mixture_model.log_prob(x).mean()
 
@@ -59,25 +67,40 @@ class GmmFull(torch.nn.Module):
         return iter([self.mixture.logits])
     
 
-    def get_probs(self):
+    def get_probs(self) -> torch.Tensor:
         return self.mixture.probs
     
     
     def get_covariance_matrix(self) -> torch.Tensor:
-        return self.scale_tril @ self.scale_tril.transpose(-2, -1)
+        return self.scale_tril @ self.scale_tril.mT
     
 
 class GmmDiagonal(torch.nn.Module):
-    def __init__(self, num_mixtures: int, num_dims: int, width: int):
+    """
+    Implements digonal gaussian mixture model
+
+    :param num_components: number of components
+    """
+    def __init__(
+        self,
+        num_components: int,
+        num_dims: int,
+        radius: float = 1.0,
+        seed: int = 42,
+    ):
+        torch.manual_seed(0)
+
         super().__init__()
-        self.num_mixtures = num_mixtures
+        self.num_components = num_components
         self.num_dims = num_dims
-        self.width = width
+        self.radius = radius
+        self.seed = seed
+        self._num_resets = 0
 
-        self.mus = torch.nn.Parameter(torch.rand(num_mixtures, num_dims).uniform_(-width, width))
-        self.sigmas_diag = torch.nn.Parameter(torch.rand(num_mixtures, num_dims))
+        self.mus = torch.nn.Parameter(torch.FloatTensor(num_components, num_dims).uniform_(-radius, radius))
+        self.sigmas_diag = torch.nn.Parameter(torch.rand(num_components, num_dims))
 
-        self.mixture = Categorical(logits=torch.rand(num_mixtures, ))
+        self.mixture = Categorical(logits=torch.zeros(num_components, ))
         self.components = Independent(Normal(self.mus, self.sigmas_diag), 1)
         self.mixture_model = MixtureSameFamily(self.mixture, self.components)
 
@@ -85,14 +108,15 @@ class GmmDiagonal(torch.nn.Module):
         self.mixture.logits.requires_grad = True
 
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         nll_loss = -1 * self.mixture_model.log_prob(x).mean()
 
         # detect singularity collapse and reset
         if nll_loss.isnan():
+            _num_resets += 1
             with torch.no_grad():
                 self.mixture.logits.uniform_(0, 1)
-                self.mus.data.uniform_(-self.width, self.width)
+                self.mus.data.uniform_(-self.radius, self.radius)
                 self.sigmas_diag.data.uniform_(0, 1)
 
             nll_loss = -1 * self.mixture_model.log_prob(x).mean()
@@ -108,7 +132,7 @@ class GmmDiagonal(torch.nn.Module):
         return iter([self.mixture.logits])
     
 
-    def get_probs(self):
+    def get_probs(self) -> torch.Tensor:
         return self.mixture.probs
 
     
@@ -118,15 +142,15 @@ class GmmDiagonal(torch.nn.Module):
 
 def get_model(
     mixture_family: MixtureFamily,
-    num_mixtures: int,
+    num_components: int,
     num_dims: int,
-    width: float
+    radius: float
 ) -> torch.nn.Module:
     if mixture_family == MixtureFamily.FULL:
-        return GmmFull(num_mixtures, num_dims, width)
+        return GmmFull(num_components, num_dims, radius)
     
     if mixture_family == MixtureFamily.DIAGONAL:
-        return GmmDiagonal(num_mixtures, num_dims, width)
+        return GmmDiagonal(num_components, num_dims, radius)
     
     raise NotImplementedError(
         f"Mixture family {mixture_family.value} not implemented yet"

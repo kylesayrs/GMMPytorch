@@ -1,5 +1,6 @@
 import torch
 import numpy
+import warnings
 import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 from torch.distributions.utils import logits_to_probs
@@ -8,44 +9,52 @@ from torch.distributions.utils import logits_to_probs
 COLORS = ["red", "blue", "green", "orange", "purple"]
 
 
-def log_and_visualize(
-    iteration_index: int,
-    data: torch.Tensor,
-    model: torch.nn.Module,
-    loss: torch.Tensor,
-    width: float
-):
-    print(f"Iteration: {iteration_index:2d}, Loss: {loss.item():.2f}")
+def plot_data_and_model(data: torch.Tensor, model: torch.nn.Module):
     if data.shape[1] == 2:
-        plot_2d(data, model, width)
+        plot_2d(data, model)
+
+    else:
+        warnings.warn("Visualization is not supported for the target data dimension")
 
 
-def plot_2d(data: torch.Tensor, model: torch.nn.Module, width: float):    
+
+def plot_2d(data: torch.Tensor, model: torch.nn.Module):    
     probs = logits_to_probs(model.mixture.logits).detach()
     covariance_matrices = model.get_covariance_matrix().detach()
     means = model.mus.detach()
 
     probs = torch.sqrt(probs)  # clearer visualization
 
-    for cluster_index in range(covariance_matrices.shape[0]):
-        x = numpy.linspace(-width - 1, width + 1, num=100)
-        y = numpy.linspace(-width - 1, width + 1, num=100)
-        X, Y = numpy.meshgrid(x, y)
-
+    radius = int(torch.max(torch.abs(data)))
+    X, Y = _make_mesh_grid(radius)
+    for component_index in range(covariance_matrices.shape[0]):
+        # create normal distribution
         distr = multivariate_normal(
-            cov=covariance_matrices[cluster_index],
-            mean=means[cluster_index]
+            cov=covariance_matrices[component_index],
+            mean=means[component_index]
         )
-        pdf = numpy.zeros(X.shape)
-        for i in range(X.shape[0]):
-            for j in range(X.shape[1]):
-                pdf[i,j] = distr.pdf([X[i,j], Y[i,j]])
 
+        # make pdf from distribution
+        pdf = [
+            [
+                distr.pdf([X[i,j], Y[i,j]])
+                for j in range(X.shape[1])
+            ]
+            for i in range(X.shape[0])
+        ]
+
+        # plot
         plt.contour(
             X, Y, pdf,
-            colors=COLORS[cluster_index % len(COLORS)],
-            alpha=float(probs[cluster_index])
+            colors=COLORS[component_index % len(COLORS)],
+            alpha=float(probs[component_index])
         )
 
     plt.scatter(*data.T)
     plt.show()
+
+
+def _make_mesh_grid(radius: int):
+    x = numpy.linspace(-radius - 1, radius + 1, num=100)
+    y = numpy.linspace(-radius - 1, radius + 1, num=100)
+    return numpy.meshgrid(x, y)
