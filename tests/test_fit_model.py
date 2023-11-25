@@ -13,6 +13,8 @@ def seed():
     torch.manual_seed(SEED)
 
 
+IDENTITY_1d = [[1]]
+HIGH_VARIANCE_1d = [[10]]
 IDENTITY_2d = [
     [1, 0],
     [0, 1]
@@ -58,6 +60,8 @@ IDENTITY_5d = [
 @pytest.mark.parametrize(
     "mean,sigma,exp_loss",
     [
+        ([0], IDENTITY_1d, 1.3),
+        ([0], HIGH_VARIANCE_1d, 2.5),
         ([0, 0], IDENTITY_2d, 2.6),
         ([0, 0], DIAG_LOW_VARIANCE_2d, 2.1),
         ([0, 0], DIAG_HIGH_VARIANCE_2d, 4.9),
@@ -92,10 +96,6 @@ def test_GmmFull_covariances(mean, sigma, exp_loss, seed):
         visualize=False
     )
 
-    print(model.mus)
-    print(mean)
-    print(torch.dist(model.mus[0], torch.tensor(mean)))
-
     assert loss == pytest.approx(exp_loss, 0.1)
     assert torch.dist(model.mus[0], torch.tensor(mean)) < 0.15
 
@@ -103,6 +103,9 @@ def test_GmmFull_covariances(mean, sigma, exp_loss, seed):
 @pytest.mark.parametrize(
     "mean,sigma,exp_loss",
     [
+        ([-1], IDENTITY_1d, 1.3),
+        ([ 1], IDENTITY_1d, 1.3),
+
         ([-1, -1], IDENTITY_2d, 2.6),
         ([ 1,  1], IDENTITY_2d, 2.6),
         ([-1,  1], IDENTITY_2d, 2.6),
@@ -144,6 +147,36 @@ def test_GmmFull_means(mean, sigma, exp_loss, seed):
 @pytest.mark.parametrize(
     "means,sigmas,exp_loss",
     [
+        (
+            [
+                [-6],
+                [-3],
+                [ 3],
+                [ 6]
+            ],
+            [
+                IDENTITY_1d,
+                IDENTITY_1d,
+                IDENTITY_1d,
+                IDENTITY_1d
+            ],
+            2.6
+        ),
+        (
+            [
+                [-6],
+                [-3],
+                [ 3],
+                [ 6]
+            ],
+            [
+                HIGH_VARIANCE_1d,
+                HIGH_VARIANCE_1d,
+                HIGH_VARIANCE_1d,
+                HIGH_VARIANCE_1d
+            ],
+            3.1
+        ),
         (
             [
                 [-10, -10],
