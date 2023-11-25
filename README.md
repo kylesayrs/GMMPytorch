@@ -1,4 +1,4 @@
-# Gaussian Mixture Model Pytorch #
+# Gaussian Mixture Models in Pytorch #
 Implements gaussian mixture models in pytorch. Loss is computed with respect to mean negative log likelihood and optimized via gradient descent.
 
 <p align="center">
