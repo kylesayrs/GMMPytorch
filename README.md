@@ -41,7 +41,9 @@ options:
 Fit model
 ```python3
 data = load_data(...)
+
 model = GmmFull(num_components=3, num_dims=2)
+
 fit_model(
     model,
     data,
