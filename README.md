@@ -2,7 +2,7 @@
 Implements gaussian mixture models in pytorch. Loss is computed with respect to mean negative log likelihood and optimized via gradient descent.
 
 <p align="center">
-<img width="50%" src="assets/5_clusters.png" alt="Example Optimization"/>
+<img width="75%" src="assets/5_clusters.png" alt="Example Optimization"/>
 </p>
 
 ## Usage ##
