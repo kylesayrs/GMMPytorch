@@ -10,7 +10,7 @@ from src.fit_model import fit_model
 from src.visualize import plot_data_and_model
 
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description="Fit a gaussian mixture model to generated mock data")
 parser.add_argument("--samples", type=int, default=1000, help="The number of total samples in dataset")
 parser.add_argument("--components", type=int, default=5, help="The number of gaussian components in mixture model")
 parser.add_argument("--dims", type=int, default=2, help="The number of data dimensions")

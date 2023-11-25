@@ -14,6 +14,8 @@ usage: demo.py [-h] [--samples SAMPLES] [--components COMPONENTS] [--dims DIMS]
                [--radius RADIUS] [--mixture_lr MIXTURE_LR] [--component_lr COMPONENT_LR]
                [--visualize VISUALIZE] [--seed SEED]
 
+Fit a gaussian mixture model to generated mock data
+
 options:
   -h, --help            show this help message and exit
   --samples SAMPLES     The number of total samples in dataset
@@ -33,6 +35,7 @@ options:
   --visualize VISUALIZE
                         True for visualization at each log event and end
   --seed SEED           seed for numpy and torch
+
 ```
 
 Run tests
