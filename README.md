@@ -32,7 +32,7 @@ p(\mathbf{x}) = \sum_{k=1}^{K} \pi_k \mathcal{N}(\mathbf{x} | \boldsymbol{\mu}_k
 Given elements of a dataset $x \in X^{(D \times N)}$, we want our model to fit to the data. This means maximizing the likelihood that the elements could have been sampled from the mixture PDF $p(\mathbf{x})$. Applying the function $-log(p(\mathbf{x}))$ for each element $\mathbf{x}$ has the effect of lowerbounding the best possible probability (1) while leaving the cost of an unlikely point (~0) unbounded. Given a dataset which contains few outliers and sufficently many components to cover the dataset, these properties make the negative log likelihood a suitable choice for our objective function.
 
 ```math
-f(\mathbf{x}) = \frac{1}{N} \sum_{i}^{N} \ln{ \sum_{k=1}^{K} \pi_k \mathcal{N}(\mathbf{x}_i | \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k) }
+f(\mathbf{x}) = \frac{1}{N} \sum_{i=1}^{N} \ln{ \sum_{k=1}^{K} \pi_k \mathcal{N}(\mathbf{x}_i | \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k) }
 ```
 
 For a from-scratch implementation of negative log likelihood backpropogation, see [GMMScratch](https://github.com/kylesayrs/GMMScratch/tree/master)
