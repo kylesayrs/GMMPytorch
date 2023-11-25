@@ -16,6 +16,11 @@ Run demo
 python3 demo.py
 ```
 
+Run tests
+```bash
+python3 -m pytest tests
+```
+
 ## Derivation ##
 We start with the probability density function of a multivariate gaussian parameterized by mean $\mu \in \mathbb{R}^{d}$ and the covariance matrix $\Sigma \in \mathrm{S}_+^d$. The PDF describes the likelihood of sampling a point $x\in\mathbb{R}^{d}$ from the distribution.
 
