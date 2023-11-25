@@ -15,12 +15,15 @@ def make_random_cov_matrix(num_dims: int, samples_per_variable: int = 10) -> num
     return numpy.corrcoef(observations)
 
 
-def trils_to_symmetric(trils: torch.Tensor) -> torch.Tensor:
-    with torch.no_grad():
-        upper_i, upper_j = torch.triu_indices(*trils.shape[1:]).tolist()
-        lower_i, lower_j = torch.tril_indices(*trils.shape[1:]).tolist()
+def scale_probs(probs: torch.Tensor, uniform_part_value: float = 0.75) -> torch.Tensor:
+    """
+    (1/n)**a = 1/2
+    a * log(1/n) = log(1/2)
+    a = log(1/2) / log(1/n)
 
-        covariance_matrix = trils.clone()
-        covariance_matrix[:, upper_i, upper_j] = trils[:, lower_i, lower_j]
-
-        return covariance_matrix
+    :param probs: tensor describing the probability of each event
+    :param uniform_part_value: the values a uniform distribution would be assigned
+    :return: probs rescaled such that 1/len(probs) = 1/2
+    """
+    alpha = numpy.log(uniform_part_value) / numpy.log(1 / len(probs))
+    return probs ** alpha
