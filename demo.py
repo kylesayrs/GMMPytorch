@@ -64,6 +64,6 @@ if __name__ == "__main__":
     )
 
     # visualize
-    print(f"Final Loss: {loss.item():.2f}")
+    print(f"Final Loss: {loss:.2f}")
     if args.visualize:
         plot_data_and_model(data, model)

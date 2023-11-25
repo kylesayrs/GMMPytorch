@@ -1,3 +1,5 @@
+from typing import Optional
+
 import torch
 
 from src.visualize import plot_data_and_model
@@ -9,9 +11,9 @@ def fit_model(
     num_iterations: int,
     mixture_lr: float,
     component_lr: float,
-    log_freq: int,
+    log_freq: Optional[int] = None,
     visualize: bool = True
-) -> torch.Tensor:
+) -> float:
     # create separate optimizers for mixture coeficients and components
     mixture_optimizer = torch.optim.Adam(model.mixture_parameters(), lr=mixture_lr)
     mixture_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(mixture_optimizer, num_iterations)
@@ -28,7 +30,7 @@ def fit_model(
         loss = model(data)
 
         # log and visualize
-        if iteration_index % log_freq == 0:
+        if log_freq is not None and iteration_index % log_freq == 0:
             print(f"Iteration: {iteration_index:2d}, Loss: {loss.item():.2f}")
             if visualize:
                 plot_data_and_model(data, model)
@@ -40,4 +42,4 @@ def fit_model(
         components_optimizer.step()
         components_scheduler.step()
 
-    return loss
+    return float(loss.detach())
