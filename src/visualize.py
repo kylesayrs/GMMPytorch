@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 from torch.distributions.utils import logits_to_probs
 
-from src.utils import scale_probs
+from src.utils import warp_probs
 
 
 COLORS = ["red", "blue", "green", "orange", "purple"]
@@ -24,7 +24,7 @@ def plot_2d(data: torch.Tensor, model: torch.nn.Module):
     covariance_matrices = model.get_covariance_matrix().detach()
     means = model.mus.detach()
 
-    alphas = scale_probs(probs, 0.75)  # clearer visualization
+    alphas = warp_probs(probs, 0.75)  # clearer visualization
     radius = int(torch.max(torch.abs(data)))
     X, Y = _make_mesh_grid(radius)
     for component_index in range(covariance_matrices.shape[0]):

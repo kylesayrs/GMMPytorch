@@ -15,15 +15,19 @@ def make_random_cov_matrix(num_dims: int, samples_per_variable: int = 10) -> num
     return numpy.corrcoef(observations)
 
 
-def scale_probs(probs: torch.Tensor, uniform_part_value: float = 0.75) -> torch.Tensor:
+def warp_probs(probs: torch.Tensor, target_value: float = 0.75) -> torch.Tensor:
     """
-    (1/n)**a = 1/2
-    a * log(1/n) = log(1/2)
-    a = log(1/2) / log(1/n)
+    Warps probability distribution such that, for a list of probabilities of
+    length n, the value 1/n becomes `target_value`.
+
+    Derivation:
+    (1/n) ** a = t
+    a * log(1/n) = log(t)
+    a = log(t) / log(1/n)
 
     :param probs: tensor describing the probability of each event
-    :param uniform_part_value: the values a uniform distribution would be assigned
+    :param target_value: the value 1/n would be assigned after scaling 
     :return: probs rescaled such that 1/len(probs) = 1/2
     """
-    alpha = numpy.log(uniform_part_value) / numpy.log(1 / len(probs))
+    alpha = numpy.log(target_value) / numpy.log(1 / len(probs))
     return probs ** alpha
