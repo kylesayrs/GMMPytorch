@@ -13,36 +13,38 @@ def seed():
     torch.manual_seed(SEED)
 
 
-SIGMA_2D_0 = [
+IDENTITY_2d = [
     [1, 0],
     [0, 1]
 ]
-
-SIGMA_2D_1 = [
-    [1, 0],
-    [0, 1]
+DIAG_LOW_VARIANCE_2d = [
+    [0.5, 0],
+    [0, 0.5]
 ]
-
-SIGMA_2D_2 = [
-    [1, 0],
-    [1, 1]
+DIAG_HIGH_VARIANCE_2d = [
+    [10, 0],
+    [0, 10]
 ]
-
-
 @pytest.mark.parametrize(
     "means,sigmas,exp_loss",
     [
-        ([[ 0,  0]], [SIGMA_2D_0], 2.6),
-        ([[ 1,  0]], [SIGMA_2D_0], 2.6),
-        ([[ 0,  1]], [SIGMA_2D_0], 2.6),
-        ([[-1,  0]], [SIGMA_2D_0], 2.6),
-        ([[ 0, -1]], [SIGMA_2D_0], 2.6),
+        ([[ 0,  0]], [IDENTITY_2d], 2.6),
+        ([[ 1,  0]], [IDENTITY_2d], 2.6),
+        ([[ 0,  1]], [IDENTITY_2d], 2.6),
+        ([[-1,  0]], [IDENTITY_2d], 2.6),
+        ([[ 0, -1]], [IDENTITY_2d], 2.6),
 
-        ([[ 0,  0]], [SIGMA_2D_1], 2.6),
-        ([[ 1,  0]], [SIGMA_2D_1], 2.6),
-        ([[ 0,  1]], [SIGMA_2D_1], 2.6),
-        ([[-1,  0]], [SIGMA_2D_1], 2.6),
-        ([[ 0, -1]], [SIGMA_2D_1], 2.6),
+        ([[ 0,  0]], [DIAG_LOW_VARIANCE_2d], 1.9),
+        ([[ 1,  0]], [DIAG_LOW_VARIANCE_2d], 1.9),
+        ([[ 0,  1]], [DIAG_LOW_VARIANCE_2d], 1.9),
+        ([[-1,  0]], [DIAG_LOW_VARIANCE_2d], 1.9),
+        ([[ 0, -1]], [DIAG_LOW_VARIANCE_2d], 1.9),
+
+        ([[ 0,  0]], [DIAG_HIGH_VARIANCE_2d], 4.9),
+        ([[ 1,  0]], [DIAG_HIGH_VARIANCE_2d], 4.9),
+        ([[ 0,  1]], [DIAG_HIGH_VARIANCE_2d], 4.9),
+        ([[-1,  0]], [DIAG_HIGH_VARIANCE_2d], 4.9),
+        ([[ 0, -1]], [DIAG_HIGH_VARIANCE_2d], 4.9),
     ],
 )
 def test_GmmFull(means, sigmas, exp_loss, seed):
