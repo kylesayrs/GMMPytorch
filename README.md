@@ -6,14 +6,33 @@ Implements gaussian mixture models in pytorch. Loss is computed with respect to 
 </p>
 
 ## Usage ##
-Install requirements
-```bash
-python3 -m pip install -r requirements.txt
-```
-
 Run demo
-```bash
-python3 demo.py
+```
+usage: demo.py [-h] [--samples SAMPLES] [--components COMPONENTS] [--dims DIMS]
+               [--iterations ITERATIONS]
+               [--family {full,diagonal,isotropic,shared_isotropic,constant}] [--log_freq LOG_FREQ]
+               [--radius RADIUS] [--mixture_lr MIXTURE_LR] [--component_lr COMPONENT_LR]
+               [--visualize VISUALIZE] [--seed SEED]
+
+options:
+  -h, --help            show this help message and exit
+  --samples SAMPLES     The number of total samples in dataset
+  --components COMPONENTS
+                        The number of gaussian components in mixture model
+  --dims DIMS           The number of data dimensions
+  --iterations ITERATIONS
+                        The number optimization steps
+  --family {full,diagonal,isotropic,shared_isotropic,constant}
+                        Model family, see `Mixture Types`
+  --log_freq LOG_FREQ   Steps per log event
+  --radius RADIUS       L1 bound of data samples
+  --mixture_lr MIXTURE_LR
+                        Learning rate of mixture parameter (pi)
+  --component_lr COMPONENT_LR
+                        Learning rate of component parameters (mus, sigmas)
+  --visualize VISUALIZE
+                        True for visualization at each log event and end
+  --seed SEED           seed for numpy and torch
 ```
 
 Run tests
