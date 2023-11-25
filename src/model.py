@@ -1,7 +1,6 @@
 from typing import Iterator
 
 import torch
-import warnings
 from torch.distributions import (
     Normal,
     Categorical,
@@ -9,7 +8,6 @@ from torch.distributions import (
     MultivariateNormal,
     MixtureSameFamily
 )
-from sklearn.datasets import make_spd_matrix
 
 from src.FamilyTypes import MixtureFamily
 from src.utils import make_random_scale_trils
@@ -21,16 +19,11 @@ class GmmFull(torch.nn.Module):
         num_components: int,
         num_dims: int,
         radius: float = 1.0,
-        seed: int = 42
     ):
-        torch.manual_seed(0)
-
         super().__init__()
         self.num_components = num_components
         self.num_dims = num_dims
         self.radius = radius
-        self.seed = seed
-        self._num_resets = 0
 
         self.mus = torch.nn.Parameter(torch.rand(num_components, num_dims).uniform_(-radius, radius))
         self.scale_tril = torch.nn.Parameter(make_random_scale_trils(num_components, num_dims))
@@ -48,7 +41,6 @@ class GmmFull(torch.nn.Module):
 
         # detect singularity collapse and reset
         if nll_loss.isnan():
-            _num_resets += 1
             with torch.no_grad():
                 self.mixture.logits.uniform_(0, 1)
                 self.mus.data.uniform_(-self.radius, self.radius)
@@ -86,16 +78,11 @@ class GmmDiagonal(torch.nn.Module):
         num_components: int,
         num_dims: int,
         radius: float = 1.0,
-        seed: int = 42,
     ):
-        torch.manual_seed(0)
-
         super().__init__()
         self.num_components = num_components
         self.num_dims = num_dims
         self.radius = radius
-        self.seed = seed
-        self._num_resets = 0
 
         self.mus = torch.nn.Parameter(torch.FloatTensor(num_components, num_dims).uniform_(-radius, radius))
         self.sigmas_diag = torch.nn.Parameter(torch.rand(num_components, num_dims))
@@ -113,7 +100,6 @@ class GmmDiagonal(torch.nn.Module):
 
         # detect singularity collapse and reset
         if nll_loss.isnan():
-            _num_resets += 1
             with torch.no_grad():
                 self.mixture.logits.uniform_(0, 1)
                 self.mus.data.uniform_(-self.radius, self.radius)

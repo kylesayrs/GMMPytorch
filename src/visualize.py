@@ -17,7 +17,6 @@ def plot_data_and_model(data: torch.Tensor, model: torch.nn.Module):
         warnings.warn("Visualization is not supported for the target data dimension")
 
 
-
 def plot_2d(data: torch.Tensor, model: torch.nn.Module):    
     probs = logits_to_probs(model.mixture.logits).detach()
     covariance_matrices = model.get_covariance_matrix().detach()
