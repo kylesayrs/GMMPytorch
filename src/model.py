@@ -25,9 +25,11 @@ class GmmFull(torch.nn.Module):
         self.num_dims = num_dims
         self.radius = radius
 
+        # learnable parameters (excluding self.mixture.logits)
         self.mus = torch.nn.Parameter(torch.rand(num_components, num_dims).uniform_(-radius, radius))
         self.scale_tril = torch.nn.Parameter(make_random_scale_trils(num_components, num_dims))
 
+        # mixture and components
         self.mixture = Categorical(logits=torch.zeros(num_components, ))
         self.components = MultivariateNormal(self.mus, scale_tril=self.scale_tril)
         self.mixture_model = MixtureSameFamily(self.mixture, self.components)
@@ -84,9 +86,11 @@ class GmmDiagonal(torch.nn.Module):
         self.num_dims = num_dims
         self.radius = radius
 
+        # learnable parameters (excluding self.mixture.logits)
         self.mus = torch.nn.Parameter(torch.FloatTensor(num_components, num_dims).uniform_(-radius, radius))
         self.sigmas_diag = torch.nn.Parameter(torch.rand(num_components, num_dims))
 
+        # mixture and components
         self.mixture = Categorical(logits=torch.zeros(num_components, ))
         self.components = Independent(Normal(self.mus, self.sigmas_diag), 1)
         self.mixture_model = MixtureSameFamily(self.mixture, self.components)
