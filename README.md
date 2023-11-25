@@ -38,6 +38,19 @@ options:
 
 ```
 
+Fit model
+```python3
+data = load_data(...)
+model = GmmFull(num_components=3, num_dims=2)
+fit_model(
+    model,
+    data,
+    num_iterations=10_000,
+    mixture_lr=1e-5
+    component_lr=1e-2
+)
+```
+
 Run tests
 ```bash
 python3 -m pytest tests
