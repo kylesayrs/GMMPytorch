@@ -1,5 +1,5 @@
 # Gaussian Mixture Models in Pytorch #
-Implements gaussian mixture models in pytorch. Loss is computed with respect to mean negative log likelihood and optimized via gradient descent.
+Implements gaussian mixture models in pytorch. Loss is computed with respect to mean negative log likelihood and optimized via gradient descent. Can be stacked on top of a fully connected layer to create a mixture density network (MDN).
 
 <p align="center">
 <img width="75%" src="assets/5_clusters.png" alt="Example Optimization"/>
