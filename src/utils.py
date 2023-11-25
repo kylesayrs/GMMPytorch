@@ -24,7 +24,7 @@ def make_random_cov_matrix(num_dims: int, observations_per_variable: int = 10) -
 
     :param num_dims: number of variables described by covariance matrix
     :param samples_per_variable: number of observations for each variable used
-    to generated covariance matrix
+        to generated covariance matrix
     :return: random covariance matrix
     """
     if num_dims == 1:

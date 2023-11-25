@@ -21,6 +21,14 @@ class MixtureModel(torch.nn.Module):
         num_dims: int,
         init_radius: float = 1.0,
     ):
+        """
+        Base model for mixture models
+
+        :param num_components: Number of component distributions
+        :param num_dims: Number of dimensions being modeled
+        :param init_radius: L1 radius within which each component mean should
+            be initialized, defaults to 1.0
+        """
         super().__init__()
         self.num_components = num_components
         self.num_dims = num_dims
@@ -46,6 +54,7 @@ class GmmFull(MixtureModel):
     ):
         super().__init__(num_components, num_dims, init_radius)
 
+        # scale_tril is the most computationally efficient representation of covariance matrix
         self.mus = torch.nn.Parameter(torch.rand(num_components, num_dims).uniform_(-init_radius, init_radius))
         self.scale_tril = torch.nn.Parameter(make_random_scale_trils(num_components, num_dims))
     
@@ -89,6 +98,7 @@ class GmmDiagonal(MixtureModel):
     ):
         super().__init__(num_components, num_dims, init_radius)
 
+        # represente covariance matrix as diagonals
         self.mus = torch.nn.Parameter(torch.FloatTensor(num_components, num_dims).uniform_(-init_radius, init_radius))
         self.sigmas_diag = torch.nn.Parameter(torch.rand(num_components, num_dims))
 
