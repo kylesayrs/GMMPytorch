@@ -84,8 +84,8 @@ def test_GmmFull_covariances(mean, sigma, exp_loss, seed):
     data = numpy.random.multivariate_normal(mean, sigma, samples_per_cluster)
     data = torch.tensor(data)
 
-    radius = numpy.max(numpy.abs(data.numpy()), axis=None)
-    model = GmmFull(num_components, num_dims, radius=radius)
+    init_radius = numpy.max(numpy.abs(data.numpy()), axis=None)
+    model = GmmFull(num_components, num_dims, init_radius)
 
     loss = fit_model(
         model,
@@ -128,8 +128,8 @@ def test_GmmFull_means(mean, sigma, exp_loss, seed):
     data = numpy.random.multivariate_normal(mean, sigma, samples_per_cluster)
     data = torch.tensor(data)
 
-    radius = numpy.max(numpy.abs(data.numpy()), axis=None)
-    model = GmmFull(num_components, num_dims, radius=radius)
+    init_radius = numpy.max(numpy.abs(data.numpy()), axis=None)
+    model = GmmFull(num_components, num_dims, init_radius)
 
     loss = fit_model(
         model,
@@ -245,8 +245,8 @@ def test_GmmFull_components(means, sigmas, exp_loss, seed):
     ])
     data = torch.tensor(data)
 
-    radius = numpy.max(numpy.abs(data.numpy()), axis=None)
-    model = GmmFull(num_components, num_dims, radius=radius)
+    init_radius = numpy.max(numpy.abs(data.numpy()), axis=None)
+    model = GmmFull(num_components, num_dims, init_radius)
 
     loss = fit_model(
         model,
