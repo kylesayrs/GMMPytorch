@@ -70,10 +70,6 @@ class GmmFull(MixtureModel):
     def component_parameters(self) -> Iterator[torch.nn.Parameter]:
         return iter([self.mus, self.scale_tril])
     
-
-    def get_probs(self) -> torch.Tensor:
-        return logits_to_probs(self.logits)
-    
     
     def get_covariance_matrix(self) -> torch.Tensor:
         return self.scale_tril @ self.scale_tril.mT
