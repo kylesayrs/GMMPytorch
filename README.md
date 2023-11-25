@@ -19,15 +19,21 @@ python3 demo.py
 ## Derivation ##
 We start with the probability density function of a multivariate gaussian parameterized by mean $\mu \in \mathbb{R}^{d}$ and the covariance matrix $\Sigma \in \mathrm{S}_+^d$. The PDF describes the likelihood of sampling a point $x\in\mathbb{R}^{d}$ from the distribution.
 
-$\mathcal{N}(\mathbf{x}) = \frac{1}{(2\pi)^{k/2}|\Sigma|^{1/2}} \exp\left(-\frac{1}{2} (\mathbf{x} - \boldsymbol{\mu})^T \Sigma^{-1} (\mathbf{x} - \boldsymbol{\mu})\right)$
+```math
+\mathcal{N}(\mathbf{x}) = \frac{1}{(2\pi)^{k/2}|\Sigma|^{1/2}} \exp\left(-\frac{1}{2} (\mathbf{x} - \boldsymbol{\mu})^T \Sigma^{-1} (\mathbf{x} - \boldsymbol{\mu})\right)
+```
 
 In order to describe a mixture of gaussians, we add an additional parameter $\pi_k \in \Delta^{k-1}$ which describes the probability that a sample comes from any of the $K gaussian components.
 
-$p(\mathbf{x}) = \sum_{k=1}^{K} \pi_k \mathcal{N}(\mathbf{x} | \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)$
+```math
+p(\mathbf{x}) = \sum_{k=1}^{K} \pi_k \mathcal{N}(\mathbf{x} | \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)
+```
 
 Given elements of a dataset $x \in X^{(D \times N)}$, we want our model to fit to the data. This means maximizing the likelihood that the elements could have been sampled from the mixture PDF $p(\mathbf{x})$. Applying the function $-log(p(\mathbf{x}))$ for each element $\mathbf{x}$ has the effect of lowerbounding the best possible probability (1) while leaving the cost of an unlikely point (~0) unbounded. Given a dataset which contains few outliers and sufficently many components to cover the dataset, these properties make the negative log likelihood a suitable choice for our objective function.
 
-$f(\mathbf{x}) = \frac{1}{N} \sum_{i}^{N} \ln{ \sum_{k=1}^{K} \pi_k \mathcal{N}(\mathbf{x}_i | \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k) }$
+```math
+f(\mathbf{x}) = \frac{1}{N} \sum_{i}^{N} \ln{ \sum_{k=1}^{K} \pi_k \mathcal{N}(\mathbf{x}_i | \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k) }
+```
 
 For a from-scratch implementation of negative log likelihood backpropogation, see [GMMScratch](https://github.com/kylesayrs/GMMScratch/tree/master)
 
