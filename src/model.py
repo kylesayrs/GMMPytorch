@@ -1,4 +1,5 @@
-from typing import Iterator
+from typing import Iterator, List
+from abc import ABC, abstractmethod
 
 import torch
 from torch.distributions import (
@@ -14,12 +15,13 @@ from src.FamilyTypes import MixtureFamily
 from src.utils import make_random_scale_trils
 
 
-class MixtureModel(torch.nn.Module):
+class MixtureModel(ABC, torch.nn.Module):
     def __init__(
         self,
         num_components: int,
         num_dims: int,
         init_radius: float = 1.0,
+        init_mus: List[List[float]] = None
     ):
         """
         Base model for mixture models
@@ -33,6 +35,7 @@ class MixtureModel(torch.nn.Module):
         self.num_components = num_components
         self.num_dims = num_dims
         self.init_radius = init_radius
+        self.init_mus = init_mus
 
         self.logits = torch.nn.Parameter(torch.zeros(num_components, ))
 
@@ -43,6 +46,26 @@ class MixtureModel(torch.nn.Module):
 
     def get_probs(self) -> torch.Tensor:
         return logits_to_probs(self.logits)
+    
+
+    @abstractmethod
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        raise NotImplementedError()
+    
+
+    @abstractmethod
+    def constrain_parameters(self):
+        raise NotImplementedError()
+
+
+    @abstractmethod
+    def component_parameters(self) -> Iterator[torch.nn.Parameter]:
+        raise NotImplementedError()
+    
+
+    @abstractmethod
+    def get_covariance_matrix(self) -> torch.Tensor:
+        raise NotImplementedError()
 
 
 class GmmFull(MixtureModel):
@@ -51,11 +74,18 @@ class GmmFull(MixtureModel):
         num_components: int,
         num_dims: int,
         init_radius: float = 1.0,
+        init_mus: List[List[float]] = None
     ):
         super().__init__(num_components, num_dims, init_radius)
 
-        # scale_tril is the most computationally efficient representation of covariance matrix
-        self.mus = torch.nn.Parameter(torch.rand(num_components, num_dims).uniform_(-init_radius, init_radius))
+        init_mus = (
+            torch.tensor(self.init_mus, dtype=torch.float32)
+            if self.init_mus is not None
+            else torch.rand(num_components, num_dims).uniform_(-init_radius, init_radius)
+        )
+        self.mus = torch.nn.Parameter(init_mus)
+        
+        # lower triangle representation of (symmetric) covariance matrix
         self.scale_tril = torch.nn.Parameter(make_random_scale_trils(num_components, num_dims))
     
 
@@ -66,15 +96,18 @@ class GmmFull(MixtureModel):
 
         nll_loss = -1 * mixture_model.log_prob(x).mean()
 
-        # detect singularity collapse and reset
-        if nll_loss.isnan():
-            with torch.no_grad():
-                self.__init__(self.num_components, self.num_dims, self.init_radius)
-
-            return self.forward(x)
-
         return nll_loss
     
+    
+    def constrain_parameters(self, epsilon: float = 1e-6):
+        with torch.no_grad():
+            for tril in self.scale_tril:
+                # cholesky decomposition requires positive diagonal
+                tril.diagonal().abs_()
+
+                # diagonal cannot be too small (singularity collapse)
+                tril.diagonal().clamp_min_(epsilon)
+            
 
     def component_parameters(self) -> Iterator[torch.nn.Parameter]:
         return iter([self.mus, self.scale_tril])
@@ -95,11 +128,18 @@ class GmmDiagonal(MixtureModel):
         num_components: int,
         num_dims: int,
         init_radius: float = 1.0,
+        init_mus: List[List[float]] = None
     ):
         super().__init__(num_components, num_dims, init_radius)
 
+        init_mus = (
+            torch.tensor(self.init_mus, dtype=torch.float32)
+            if self.init_mus is not None
+            else torch.rand(num_components, num_dims).uniform_(-init_radius, init_radius)
+        )
+        self.mus = torch.nn.Parameter(init_mus)
+
         # represente covariance matrix as diagonals
-        self.mus = torch.nn.Parameter(torch.FloatTensor(num_components, num_dims).uniform_(-init_radius, init_radius))
         self.sigmas_diag = torch.nn.Parameter(torch.rand(num_components, num_dims))
 
 
@@ -110,14 +150,17 @@ class GmmDiagonal(MixtureModel):
 
         nll_loss = -1 * mixture_model.log_prob(x).mean()
 
-        # detect singularity collapse and reset
-        if nll_loss.isnan():
-            with torch.no_grad():
-                self.__init__(self.num_components, self.num_dims, self.init_radius)
-
-            return self.forward(x)
-
         return nll_loss
+
+
+    def constrain_parameters(self, epsilon: float = 1e-6):
+        with torch.no_grad():
+            for diag in self.sigmas_diag:
+                # cholesky decomposition requires positive diagonal
+                diag.abs_()
+
+                # diagonal cannot be too small (singularity collapse)
+                diag.clamp_min_(epsilon)
     
 
     def component_parameters(self) -> Iterator[torch.nn.Parameter]:

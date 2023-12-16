@@ -1,20 +1,23 @@
 import pytest
 import torch
+from torch.distributions import constraints
 
 from src.utils import make_random_scale_trils, make_random_cov_matrix, warp_probs
 
 
 @pytest.mark.parametrize(
-    "num_sigmas,num_dims",
+    "num_components,num_dims",
     [
         (1, 1),
         (5, 7),
         (10, 10),
     ],
 )
-def test_make_random_scale_trils(num_sigmas, num_dims):
-    trils = make_random_scale_trils(num_sigmas, num_dims)
-    assert trils.shape == torch.Size([num_sigmas, num_dims, num_dims])
+def test_make_random_scale_trils(num_components, num_dims):
+    trils = make_random_scale_trils(num_components, num_dims)
+
+    assert trils.shape == torch.Size([num_components, num_dims, num_dims])
+    assert torch.all(constraints.lower_cholesky.check(trils))
 
 
 @pytest.mark.parametrize(

@@ -259,3 +259,34 @@ def test_GmmFull_components(means, sigmas, exp_loss, seed):
 
     assert loss == pytest.approx(exp_loss, 0.1)
     # cannot test means due to identifiability issue
+
+
+@pytest.mark.parametrize(
+    "data,init_mus,exp_loss",
+    [
+        ([[0.0]],        [[0.0]],        1.1),
+        ([[0.0], [1.0]], [[0.0], [1.0]], 0.7),
+    ],
+)
+def test_GmmFull_Singularity(data, init_mus, exp_loss, seed):
+    num_iterations = 5_000
+    mixture_lr = 0.0
+    component_lr = 0.1
+    num_components = 2
+    init_radius = 1.0
+    num_dims = len(data[0])
+    
+    data = torch.tensor(data)
+
+    model = GmmFull(num_components, num_dims, init_radius, init_mus)
+
+    loss = fit_model(
+        model,
+        data,
+        num_iterations,
+        mixture_lr,
+        component_lr,
+        visualize=False
+    )
+
+    assert loss == pytest.approx(exp_loss, 0.1)

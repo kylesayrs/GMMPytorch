@@ -42,4 +42,7 @@ def fit_model(
         components_optimizer.step()
         components_scheduler.step()
 
+        # constrain parameters
+        model.constrain_parameters()
+
     return float(loss.detach())
