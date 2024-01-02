@@ -65,7 +65,7 @@ We start with the probability density function of a multivariate gaussian parame
 \mathcal{N}(\mathbf{x}) = \frac{1}{(2\pi)^{k/2}|\Sigma|^{1/2}} \exp\left(-\frac{1}{2} (\mathbf{x} - \boldsymbol{\mu})^T \Sigma^{-1} (\mathbf{x} - \boldsymbol{\mu})\right)
 ```
 
-In order to describe a mixture of gaussians, we add an additional parameter $\pi_k \in \Delta^{k-1}$ which describes the probability that a sample comes from any of the $K gaussian components.
+In order to describe a mixture of gaussians, we add an additional parameter $\pi_k \in \Delta^{k-1}$ which assigns the probability that a sample comes from any of the $K$ gaussian components.
 
 ```math
 p(\mathbf{x}) = \sum_{k=1}^{K} \pi_k \mathcal{N}(\mathbf{x} | \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)
@@ -84,7 +84,7 @@ For a from-scratch implementation of negative log likelihood backpropogation, se
 | Type       | Description                                                                   |
 | ---------- | ----------------------------------------------------------------------------- |
 | Full       | Fully expressive eigenvalues. Data can be skewed in any direction             |
-| Diagonal   | Eigenvalues align with data axes. Dimensional variance is indepedent          |
+| Diagonal   | Eigenvalues align with data axes. Dimensional variance is independent         |
 | Isotropic  | Equal variance in all directions. Spherical distributions                     |
 | Shared     | Equal variance in all directions for all components                           |
 | Constant   | Variance is not learned and is equal across all dimensions and components     |
