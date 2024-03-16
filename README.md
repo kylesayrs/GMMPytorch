@@ -38,19 +38,23 @@ options:
 
 ```
 
-Fit model
+Usage
 ```python3
 data = load_data(...)
 
 model = GmmFull(num_components=3, num_dims=2)
 
-fit_model(
+loss = fit_model(
     model,
     data,
     num_iterations=10_000,
     mixture_lr=1e-5
     component_lr=1e-2
 )
+
+# visualize
+print(f"Final Loss: {loss:.2f}")
+plot_data_and_model(data, model)
 ```
 
 Run tests
