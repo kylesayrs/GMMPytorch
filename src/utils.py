@@ -1,6 +1,5 @@
 import torch
 import numpy
-from sklearn.datasets import make_spd_matrix
 
 
 def make_random_scale_trils(num_sigmas: int, num_dims: int) -> torch.Tensor:

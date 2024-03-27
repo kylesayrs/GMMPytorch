@@ -3,7 +3,6 @@ import numpy
 import warnings
 import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
-from torch.distributions.utils import logits_to_probs
 
 from src.utils import warp_probs
 

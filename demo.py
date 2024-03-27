@@ -1,7 +1,6 @@
 import torch
 import numpy
 import argparse
-import warnings
 
 from src.data import generate_data
 from src.model import get_model

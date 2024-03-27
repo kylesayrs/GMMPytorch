@@ -2,7 +2,6 @@ from typing import Tuple, List
 
 import torch
 import numpy
-from sklearn.datasets import make_spd_matrix
 
 from src.FamilyTypes import MixtureFamily
 from src.utils import make_random_cov_matrix

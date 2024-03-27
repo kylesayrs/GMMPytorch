@@ -28,6 +28,7 @@ def fit_model(
 
         # forward
         loss = model(data)
+        print(loss)
 
         # log and visualize
         if log_freq is not None and iteration_index % log_freq == 0:
