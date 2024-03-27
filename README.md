@@ -1,5 +1,5 @@
 # Gaussian Mixture Models in Pytorch #
-Implements gaussian mixture models in pytorch. Loss is computed with respect to mean negative log likelihood and optimized via gradient descent. Can be stacked on top of a fully connected layer to create a mixture density network (MDN).
+Implements gaussian mixture models in pytorch. Loss is computed with respect to mean negative log likelihood and optimized via gradient descent.
 
 <p align="center">
 <img width="75%" src="assets/5_clusters.png" alt="Example Optimization"/>
@@ -94,6 +94,10 @@ For a from-scratch implementation of negative log likelihood backpropogation, se
 | Constant   | Variance is not learned and is equal across all dimensions and components     |
 
 As of now only Full and Diagonal mixture types have been implemented
+
+## Comparison to Expectation Maximization (EM) Algorithm ##
+For more information, see [On Convergence Properties of the EM
+Algorithm for Gaussian Mixtures](https://dspace.mit.edu/bitstream/handle/1721.1/7195/AIM-1520.pdf?sequence=2).
 
 ## Singularity Mitigation ##
 From Pattern Recognition and Machine Learning by Christopher M. Bishop, pg. 433:
