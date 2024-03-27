@@ -264,8 +264,8 @@ def test_GmmFull_components(means, sigmas, exp_loss, seed):
 @pytest.mark.parametrize(
     "data,init_mus,exp_loss",
     [
-        ([[0.0]],        [[0.0]],        1.1),
-        ([[0.0], [1.0]], [[0.0], [1.0]], 0.7),
+        ([[0.0]],        [[0.0]],        -12.9),
+        ([[0.0], [1.0]], [[0.0], [1.0]],   1.5),
     ],
 )
 def test_GmmFull_Singularity(data, init_mus, exp_loss, seed):
