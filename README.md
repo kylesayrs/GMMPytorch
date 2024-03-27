@@ -80,7 +80,7 @@ f(\mathbf{x}) = - \frac{1}{N} \sum_{i=1}^{N} \ln{ \sum_{k=1}^{K} \pi_k \mathcal{
 For a from-scratch implementation of negative log likelihood backpropogation, see [GMMScratch](https://github.com/kylesayrs/GMMScratch/tree/master)
 
 
-## Mixture Types ##
+## Gaussian Model Types ##
 | Type       | Description                                                                   |
 | ---------- | ----------------------------------------------------------------------------- |
 | Full       | Fully expressive eigenvalues. Data can be skewed in any direction             |

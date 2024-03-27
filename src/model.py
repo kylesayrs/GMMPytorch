@@ -16,6 +16,15 @@ from src.utils import make_random_scale_trils
 
 
 class MixtureModel(ABC, torch.nn.Module):
+    """
+    Base model for mixture models
+
+    :param num_components: Number of component distributions
+    :param num_dims: Number of dimensions being modeled
+    :param init_radius: L1 radius within which each component mean should
+        be initialized, defaults to 1.0
+    :param init_mus: mean values to initialize model with, defaults to None
+    """
     def __init__(
         self,
         num_components: int,
@@ -23,19 +32,9 @@ class MixtureModel(ABC, torch.nn.Module):
         init_radius: float = 1.0,
         init_mus: List[List[float]] = None
     ):
-        """
-        Base model for mixture models
-
-        :param num_components: Number of component distributions
-        :param num_dims: Number of dimensions being modeled
-        :param init_radius: L1 radius within which each component mean should
-            be initialized, defaults to 1.0
-        """
         super().__init__()
         self.num_components = num_components
         self.num_dims = num_dims
-        self.init_radius = init_radius
-        self.init_mus = init_mus
 
         self.logits = torch.nn.Parameter(torch.zeros(num_components, ))
 
@@ -69,6 +68,15 @@ class MixtureModel(ABC, torch.nn.Module):
 
 
 class GmmFull(MixtureModel):
+    """
+    Gaussian mixture model with full covariance matrix expression
+
+    :param num_components: Number of component distributions
+    :param num_dims: Number of dimensions being modeled
+    :param init_radius: L1 radius within which each component mean should
+        be initialized, defaults to 1.0
+    :param init_mus: mean values to initialize model with, defaults to None
+    """
     def __init__(
         self,
         num_components: int,
@@ -76,14 +84,13 @@ class GmmFull(MixtureModel):
         init_radius: float = 1.0,
         init_mus: List[List[float]] = None
     ):
-        super().__init__(num_components, num_dims, init_radius)
+        super().__init__(num_components, num_dims)
 
-        init_mus = (
-            torch.tensor(self.init_mus, dtype=torch.float32)
-            if self.init_mus is not None
+        self.mus = torch.nn.Parameter(
+            torch.tensor(init_mus, dtype=torch.float32)
+            if init_mus is not None
             else torch.rand(num_components, num_dims).uniform_(-init_radius, init_radius)
         )
-        self.mus = torch.nn.Parameter(init_mus)
         
         # lower triangle representation of (symmetric) covariance matrix
         self.scale_tril = torch.nn.Parameter(make_random_scale_trils(num_components, num_dims))
@@ -119,9 +126,13 @@ class GmmFull(MixtureModel):
 
 class GmmDiagonal(MixtureModel):
     """
-    Implements diagonal gaussian mixture model
+    Gaussian mixture model with only a diagonal covariance matrix
 
-    :param num_components: number of components
+    :param num_components: Number of component distributions
+    :param num_dims: Number of dimensions being modeled
+    :param init_radius: L1 radius within which each component mean should
+        be initialized, defaults to 1.0
+    :param init_mus: mean values to initialize model with, defaults to None
     """
     def __init__(
         self,
@@ -130,16 +141,15 @@ class GmmDiagonal(MixtureModel):
         init_radius: float = 1.0,
         init_mus: List[List[float]] = None
     ):
-        super().__init__(num_components, num_dims, init_radius)
+        super().__init__(num_components, num_dims)
 
-        init_mus = (
+        self.mus = torch.nn.Parameter(
             torch.tensor(self.init_mus, dtype=torch.float32)
             if self.init_mus is not None
             else torch.rand(num_components, num_dims).uniform_(-init_radius, init_radius)
         )
-        self.mus = torch.nn.Parameter(init_mus)
 
-        # represente covariance matrix as diagonals
+        # represent covariance matrix as diagonals
         self.sigmas_diag = torch.nn.Parameter(torch.rand(num_components, num_dims))
 
 
