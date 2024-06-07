@@ -13,7 +13,7 @@ from src.model.base import MixtureModel
 
 class GmmIsotropic(MixtureModel):
     """
-    Gaussian mixture model with only a diagonal covariance matrix
+    Gaussian mixture model with equal variance in all dimensions for each component
 
     :param num_components: Number of component distributions
     :param num_dims: Number of dimensions being modeled
