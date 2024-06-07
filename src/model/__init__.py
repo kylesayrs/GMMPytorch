@@ -1,6 +1,7 @@
 from .base import *
 from .full import *
 from .diagonal import *
+from .isotropic import *
 
 
 def get_model(
@@ -14,6 +15,9 @@ def get_model(
     
     if mixture_family == MixtureFamily.DIAGONAL:
         return GmmDiagonal(num_components, num_dims, radius)
+    
+    if mixture_family == MixtureFamily.ISOTROPIC:
+        return GmmIsotropic(num_components, num_dims, radius)
     
     raise NotImplementedError(
         f"Mixture family {mixture_family.value} not implemented yet"

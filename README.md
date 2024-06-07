@@ -93,7 +93,7 @@ For a from-scratch implementation of negative log likelihood backpropogation, se
 | Shared     | Equal variance in all directions for all components                           |
 | Constant   | Variance is not learned and is equal across all dimensions and components     |
 
-While more expressive varieties are able to better fit to real-world data, they require learning more parameters and are often less stable during training. As of now only Full and Diagonal mixture types have been implemented.
+While more expressive varieties are able to better fit to real-world data, they require learning more parameters and are often less stable during training. As of now only Full, Diagonal, and Isotropic mixture types have been implemented.
 
 ## Comparison to Expectation Maximization (EM) Algorithm ##
 For more information, see [On Convergence Properties of the EM
