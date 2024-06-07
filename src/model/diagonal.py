@@ -31,8 +31,8 @@ class GmmDiagonal(MixtureModel):
         super().__init__(num_components, num_dims)
 
         self.mus = torch.nn.Parameter(
-            torch.tensor(self.init_mus, dtype=torch.float32)
-            if self.init_mus is not None
+            torch.tensor(init_mus, dtype=torch.float32)
+            if init_mus is not None
             else torch.rand(num_components, num_dims).uniform_(-init_radius, init_radius)
         )
 
