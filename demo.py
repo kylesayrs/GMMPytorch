@@ -32,14 +32,13 @@ if __name__ == "__main__":
     mixture_family = get_mixture_family_from_str(args.family)
     data_radius = args.radius
 
-    # load data
+    # generate data
     data, true_mus, true_sigmas = generate_data(
         args.samples,
         args.components,
         args.dims,
         data_radius,
-        mixture_family,
-        args.seed
+        mixture_family
     )
 
     # set up model

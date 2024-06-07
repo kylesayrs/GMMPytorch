@@ -12,8 +12,7 @@ def generate_data(
     num_clusters: int,
     num_dims: int,
     radius: float,
-    family: MixtureFamily,
-    seed: int = 42
+    family: MixtureFamily
 ) -> Tuple[List[numpy.ndarray], List[numpy.ndarray], torch.Tensor]:
     """
     Sample data from mock gaussian distributions
@@ -31,13 +30,20 @@ def generate_data(
 
     samples_per_cluster = num_samples // num_clusters
 
+    shared_random_sigma = numpy.random.random(1)
     for _ in range(num_clusters):
         true_mu = numpy.random.uniform(-radius, radius, num_dims)
 
         if family == MixtureFamily.FULL:
             true_sigma = make_random_cov_matrix(num_dims)
-        else:
+        elif family == MixtureFamily.DIAGONAL:
             true_sigma = numpy.diag(numpy.random.random(num_dims))
+        elif family == MixtureFamily.ISOTROPIC:
+            true_sigma = numpy.diag(numpy.random.random(1).repeat(num_dims))
+        elif family == MixtureFamily.SHARED_ISOTROPIC:
+            true_sigma = numpy.diag(shared_random_sigma.repeat(num_dims))
+        else:
+            true_sigma = numpy.diag([1] * num_dims)
 
         samples = numpy.random.multivariate_normal(true_mu, true_sigma, samples_per_cluster)
 
