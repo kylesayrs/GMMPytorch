@@ -49,6 +49,7 @@ def plot_2d(data: torch.Tensor, model: torch.nn.Module):
             alpha=float(alphas[component_index])
         )
 
+    plt.gca().set_aspect("equal")
     plt.scatter(*data.T)
     plt.show()
 
