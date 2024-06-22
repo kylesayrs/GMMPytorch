@@ -2,19 +2,18 @@ from typing import Iterator, List
 
 import torch
 from torch.distributions import (
+    Normal,
     Categorical,
-    MultivariateNormal,
+    Independent,
     MixtureSameFamily
 )
 
 from src.model.base import MixtureModel
-from src.FamilyTypes import MixtureFamily
-from src.utils import make_random_scale_trils
 
 
-class GmmFull(MixtureModel):
+class GmmSharedIsotropic(MixtureModel):
     """
-    Gaussian mixture model with full covariance matrix expression
+    Gaussian mixture model with equal variance in all dimensions for all components
 
     :param num_components: Number of component distributions
     :param num_dims: Number of dimensions being modeled
@@ -36,34 +35,37 @@ class GmmFull(MixtureModel):
             if init_mus is not None
             else torch.rand(num_components, num_dims).uniform_(-init_radius, init_radius)
         )
-        
-        # lower triangle representation of (symmetric) covariance matrix
-        self.scale_tril = torch.nn.Parameter(make_random_scale_trils(num_components, num_dims))
-    
+
+        # represent covariance matrix as one standard deviation per component
+        self.sigma = torch.nn.Parameter(torch.rand((1, )))
+
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         mixture = Categorical(logits=self.logits)
-        components = MultivariateNormal(self.mus, scale_tril=self.scale_tril)
+        components = Independent(Normal(self.mus, self.sigma), 1)
         mixture_model = MixtureSameFamily(mixture, components)
 
         nll_loss = -1 * mixture_model.log_prob(x).mean()
 
         return nll_loss
-    
-    
+
+
     def constrain_parameters(self, epsilon: float = 1e-6):
         with torch.no_grad():
-            for tril in self.scale_tril:
-                # cholesky decomposition requires positive diagonal
-                tril.diagonal().abs_()
+            # cholesky decomposition requires positive diagonal
+            self.sigma.abs_()
 
-                # diagonal cannot be too small (singularity collapse)
-                tril.diagonal().clamp_min_(epsilon)
-            
+            # diagonal cannot be too small (singularity collapse)
+            self.sigma.clamp_min_(epsilon)
+    
 
     def component_parameters(self) -> Iterator[torch.nn.Parameter]:
-        return iter([self.mus, self.scale_tril])
+        return iter([self.mus, self.sigma])
     
-    
+
     def get_covariance_matrix(self) -> torch.Tensor:
-        return self.scale_tril @ self.scale_tril.mT
+        cov_matrix = torch.zeros((self.num_components, self.num_dims, self.num_dims))
+        for matrix in cov_matrix:
+            matrix.fill_diagonal_(self.sigma.item())
+
+        return cov_matrix
