@@ -5,7 +5,6 @@ import argparse
 from src.data import generate_data
 from src.model import get_model
 from src.FamilyTypes import FAMILY_NAMES, get_mixture_family_from_str
-from src.fit_model import fit_model
 from src.visualize import plot_data_and_model
 
 
@@ -20,7 +19,7 @@ parser.add_argument("--radius", type=float, default=8.0, help="L1 bound of data 
 parser.add_argument("--mixture_lr", type=float, default=3e-5, help="Learning rate of mixture parameter (pi)")
 parser.add_argument("--component_lr", type=float, default=1e-2, help="Learning rate of component parameters (mus, sigmas)")
 parser.add_argument("--visualize", type=bool, default=True, help="True for visualization at each log event and end")
-parser.add_argument("--seed", type=int, default=0, help="seed for numpy and torch")
+parser.add_argument("--seed", type=int, default=42, help="seed for numpy and torch")
 
 
 if __name__ == "__main__":
@@ -50,8 +49,7 @@ if __name__ == "__main__":
     )
 
     # fit model
-    loss = fit_model(
-        model,
+    loss = model.fit_model(
         data,
         args.iterations,
         args.mixture_lr,

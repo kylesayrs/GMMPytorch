@@ -44,8 +44,7 @@ data = load_data(...)
 
 model = GmmFull(num_components=3, num_dims=2)
 
-loss = fit_model(
-    model,
+loss = model.fit_model(
     data,
     num_iterations=10_000,
     mixture_lr=1e-5
