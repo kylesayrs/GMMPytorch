@@ -39,7 +39,7 @@ class MixtureModel(ABC, torch.nn.Module):
         return logits_to_probs(self.logits)
     
 
-    def fit_model(
+    def fit(
         self,
         data: torch.Tensor,
         num_iterations: int,

@@ -86,7 +86,7 @@ def test_GmmFull_covariances(mean, sigma, exp_loss, seed):
     init_radius = numpy.max(numpy.abs(data.numpy()), axis=None)
     model = GmmFull(num_components, num_dims, init_radius)
 
-    loss = model.fit_model(
+    loss = model.fit(
         data,
         num_iterations,
         mixture_lr,
@@ -129,7 +129,7 @@ def test_GmmFull_means(mean, sigma, exp_loss, seed):
     init_radius = numpy.max(numpy.abs(data.numpy()), axis=None)
     model = GmmFull(num_components, num_dims, init_radius)
 
-    loss = model.fit_model(
+    loss = model.fit(
         data,
         num_iterations,
         mixture_lr,
@@ -245,7 +245,7 @@ def test_GmmFull_components(means, sigmas, exp_loss, seed):
     init_radius = numpy.max(numpy.abs(data.numpy()), axis=None)
     model = GmmFull(num_components, num_dims, init_radius)
 
-    loss = model.fit_model(
+    loss = model.fit(
         data,
         num_iterations,
         mixture_lr,
@@ -276,7 +276,7 @@ def test_GmmFull_Singularity(data, init_mus, exp_loss, seed):
 
     model = GmmFull(num_components, num_dims, init_radius, init_mus)
 
-    loss = model.fit_model(
+    loss = model.fit(
         data,
         num_iterations,
         mixture_lr,

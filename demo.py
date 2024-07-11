@@ -49,7 +49,7 @@ if __name__ == "__main__":
     )
 
     # fit model
-    loss = model.fit_model(
+    loss = model.fit(
         data,
         args.iterations,
         args.mixture_lr,
