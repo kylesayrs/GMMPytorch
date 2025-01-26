@@ -62,7 +62,6 @@ class MixtureModel(ABC, torch.nn.Module):
 
             # forward
             loss = self(data)
-            print(loss)
 
             # log and visualize
             if log_freq is not None and iteration_index % log_freq == 0:
