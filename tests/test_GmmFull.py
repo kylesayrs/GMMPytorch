@@ -56,6 +56,8 @@ IDENTITY_5d = [
     [0, 0, 0, 1, 0],
     [0, 0, 0, 0, 1],
 ]
+
+
 @pytest.mark.parametrize(
     "mean,sigma,exp_loss",
     [
