@@ -103,3 +103,6 @@ From Pattern Recognition and Machine Learning by Christopher M. Bishop, pg. 433:
 > Suppose that one of the components of the mixture model, let us say the jth component, has its mean μ_j exactly equal to one of the data points so that μ_j = x_n for some value of n. If we consider the limit σ_j → 0, then we see that this term goes to infinity and so the log likelihood function will also go to infinity. Thus the maximization of the log likelihood function is not a well posed problem because such singularities will always be present and will occur whenever one of the Gaussian components ‘collapses’ onto a specific data point.
 
 A common solution to this problem is to reset the mean of the offending component whenever a singularity appears. In practice, singularities can be mitigated by clamping the minimum value of elements on the covariance diagonal. In a stochastic environment, a large enough clamp value will allow the model to recover after a few iterations.
+
+## Motivation ##
+This project is not associated with any course or program. Instead, I hope that it serves as an educational tool for exploring the capabilities and engineering behind probabilistic modeling, custom loss functions, and differentiable programming in PyTorch.
