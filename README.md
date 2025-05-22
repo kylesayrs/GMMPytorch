@@ -80,7 +80,7 @@ Given elements of a dataset $x \in X^{(D \times N)}$, we want our model to fit t
 f(\mathbf{x}) = - \frac{1}{N} \sum_{i=1}^{N} \ln{ \sum_{k=1}^{K} \pi_k \mathcal{N}(\mathbf{x}_i | \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k) }
 ```
 
-For a from-scratch implementation of negative log likelihood backpropogation, see [GMMScratch](https://github.com/kylesayrs/GMMScratch/tree/master)
+For a from-scratch implementation of negative log likelihood backpropogation, see [GMMScratch](https://github.com/kylesayrs/GMMScratch/tree/master).
 
 
 ## Gaussian Model Types ##
